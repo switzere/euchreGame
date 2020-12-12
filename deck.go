@@ -1,8 +1,9 @@
 package main
 
 import (
-  "fmt"
+  //"fmt"
   "math/rand"
+  "time"
 )
 
 
@@ -56,27 +57,13 @@ func makeDeck(deckType string) *Deck {
 }
 
 func drawCard(deck *Deck) Card {
-  r := rand.Intn(len(deck.inDeckCards))
+  if(len(deck.inDeckCards) == 0) {
+    return Card{-1, -1}
+  }
+  seed := rand.NewSource(time.Now().UnixNano())
+  random := rand.New(seed)
+  r := random.Intn(len(deck.inDeckCards))
   retCard := deck.inDeckCards[r]
   deck.inDeckCards = append(deck.inDeckCards[:r], deck.inDeckCards[r+1:]...)
   return retCard
-}
-
-func main() {
-  fmt.Println("hello world")
-
-
-  deck := *makeDeck("euchre")
-  fmt.Println(deck)
-  
-  for i := 0; i < 20; i++ {
-    newCard := drawCard(&deck)
-    fmt.Println(newCard)
-
-  }
-
-  //newCard := drawCard(&deck)
-
-  //fmt.Println(newCard)
-  fmt.Println(deck)
 }
