@@ -18,6 +18,12 @@ type Card struct {
   value int
 }
 
+type playedCard struct {
+  suit int
+  value int
+  owner Player
+}
+
 const (
   Spade = iota
   Heart
@@ -66,4 +72,14 @@ func drawCard(deck *Deck) Card {
   retCard := deck.inDeckCards[r]
   deck.inDeckCards = append(deck.inDeckCards[:r], deck.inDeckCards[r+1:]...)
   return retCard
+}
+
+func drawHand(deck *Deck, hand *Hand, numCards int) {
+  if numCards <= 0 {
+    return
+  }
+
+  for i := 0; i < numCards; i++ {
+    hand.cards = append(hand.cards, drawCard(deck))
+  }
 }
