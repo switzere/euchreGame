@@ -1,5 +1,9 @@
 package main
 
+import (
+  "fmt"
+)
+
 type Hand struct {
   cards []Card
   tricks int
@@ -11,5 +15,15 @@ type Player struct {
 }
 
 func playCard(player *Player, card Card) {
-  //player.hand.cards.remove(card)
+
+  for i := 0; i < len(player.hand.cards); i++ {
+    if player.hand.cards[i].suit == card.suit && player.hand.cards[i].value == card.value {
+      fmt.Printf("remove %+v\n",card)
+      player.hand.cards = append(player.hand.cards[:i], player.hand.cards[i+1:]...)
+    } else {
+      fmt.Printf("dont remove %+v\n",player.hand.cards[i])
+    }
+  }
+
+
 }

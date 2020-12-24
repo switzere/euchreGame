@@ -21,15 +21,40 @@ type roundState struct {
 
 func playRound(team1 *Team, team2 *Team, gS gameState) Player {
 
+  var suit int = -1
+  var card int = -1
+
   for i := 0; i < 4; i++ {
     if team1.player1.pId == gS.order[i].pId {
-      fmt.Println("Player 1 played")
+      fmt.Printf("Team 1 Player 1:\n")
+      fmt.Printf("Hand: %+v\n\n",team1.player1.hand)
+      fmt.Printf("Choose a card to play: ")
+      fmt.Scanf("%d,%d", &suit, &card)
+      fmt.Println(suit)
+      fmt.Println(card)
+      removeCard := Card{suit, card}
+      playCard(&team1.player1, removeCard)
     } else if team1.player2.pId == gS.order[i].pId {
-      fmt.Println("Player 2 played")
+      fmt.Printf("Team 1 Player 2:\n")
+      /*fmt.Printf("Hand: %+v\n\n",team2.player2.hand)
+      fmt.Printf("Choose a card to play: ")
+      fmt.Scanf("%d,%d", &suit, &card)
+      fmt.Println(suit)
+      fmt.Println(card)*/
     } else if team2.player1.pId == gS.order[i].pId {
-      fmt.Println("Player 3 played")
+      fmt.Printf("Team 2 Player 1:\n")
+      /*fmt.Printf("Hand: %+v\n\n",team2.player1.hand)
+      fmt.Printf("Choose a card to play: ")
+      fmt.Scanf("%d,%d", &suit, &card)
+      fmt.Println(suit)
+      fmt.Println(card)*/
     } else if team2.player2.pId == gS.order[i].pId {
-      fmt.Println("Player 4 played")
+      fmt.Printf("Team 2 Player 2:\n")
+      /*fmt.Printf("Hand: %+v\n\n",team2.player2.hand)
+      fmt.Printf("Choose a card to play: ")
+      fmt.Scanf("%d,%d", &suit, &card)
+      fmt.Println(suit)
+      fmt.Println(card)*/
     }
   }
 
@@ -83,12 +108,12 @@ func play() {
   drawHand(&deck, &team2.player2.hand, 5)
 
 
-  fmt.Printf("%+v\n",team1.player1)
-  fmt.Printf("%+v\n",team1.player2)
-  fmt.Printf("%+v\n",team2.player1)
-  fmt.Printf("%+v\n",team2.player2)
+  fmt.Printf("\nplayer1 from team1:\n%+v\n",team1.player1)
+  fmt.Printf("player2 from team1:\n%+v\n\n",team1.player2)
+  fmt.Printf("player1 from team2:\n%+v\n\n",team2.player1)
+  fmt.Printf("player2 from team2:\n%+v\n\n",team2.player2)
 
-  fmt.Printf("%+v\n",deck)
+  fmt.Printf("deck:\n%+v\n\n",deck)
 
   playHand(&team1, &team2, gState, team1.player1)
 
