@@ -19,49 +19,98 @@ type roundState struct {
   start Player
 }
 
-func playRound(team1 *Team, team2 *Team, gS gameState) Player {
+func winRound(cards [4]Card) int {
+//temporary calculator
+  if cards[0].value > cards[1].value && cards[0].value > cards[2].value && cards[0].value > cards[3].value {
+    return 0
+  } else if cards[1].value > cards[0].value && cards[1].value > cards[2].value && cards[1].value > cards[3].value {
+    return 1
+  } else if cards[2].value > cards[0].value && cards[2].value > cards[1].value && cards[2].value > cards[3].value {
+    return 2
+  } else if cards[3].value > cards[0].value && cards[3].value > cards[1].value && cards[3].value > cards[2].value {
+    return 3
+  }
+
+  return -1
+}
+
+func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
 
   var suit int = -1
   var card int = -1
 
+  var cardsPlayed [4]Card
+
   for i := 0; i < 4; i++ {
     if team1.player1.pId == gS.order[i].pId {
-      fmt.Printf("Team 1 Player 1:\n")
+      fmt.Printf("\nTeam 1 Player 1:\n")
       fmt.Printf("Hand: %+v\n\n",team1.player1.hand)
       fmt.Printf("Choose a card to play: ")
       fmt.Scanf("%d,%d", &suit, &card)
       fmt.Println(suit)
       fmt.Println(card)
       removeCard := Card{suit, card}
-      playCard(&team1.player1, removeCard)
+      cardsPlayed[i] = playCard(&team1.player1, removeCard)
     } else if team1.player2.pId == gS.order[i].pId {
-      fmt.Printf("Team 1 Player 2:\n")
-      /*fmt.Printf("Hand: %+v\n\n",team2.player2.hand)
+      fmt.Printf("\nTeam 1 Player 2:\n")
+      fmt.Printf("Hand: %+v\n\n",team1.player2.hand)
       fmt.Printf("Choose a card to play: ")
       fmt.Scanf("%d,%d", &suit, &card)
       fmt.Println(suit)
-      fmt.Println(card)*/
+      fmt.Println(card)
+      removeCard := Card{suit, card}
+      cardsPlayed[i] = playCard(&team1.player2, removeCard)
     } else if team2.player1.pId == gS.order[i].pId {
-      fmt.Printf("Team 2 Player 1:\n")
-      /*fmt.Printf("Hand: %+v\n\n",team2.player1.hand)
+      fmt.Printf("\nTeam 2 Player 1:\n")
+      fmt.Printf("Hand: %+v\n\n",team2.player1.hand)
       fmt.Printf("Choose a card to play: ")
       fmt.Scanf("%d,%d", &suit, &card)
       fmt.Println(suit)
-      fmt.Println(card)*/
+      fmt.Println(card)
+      removeCard := Card{suit, card}
+      cardsPlayed[i] = playCard(&team2.player1, removeCard)
     } else if team2.player2.pId == gS.order[i].pId {
-      fmt.Printf("Team 2 Player 2:\n")
-      /*fmt.Printf("Hand: %+v\n\n",team2.player2.hand)
+      fmt.Printf("\nTeam 2 Player 2:\n")
+      fmt.Printf("Hand: %+v\n\n",team2.player2.hand)
       fmt.Printf("Choose a card to play: ")
       fmt.Scanf("%d,%d", &suit, &card)
       fmt.Println(suit)
-      fmt.Println(card)*/
+      fmt.Println(card)
+      removeCard := Card{suit, card}
+      cardsPlayed[i] = playCard(&team2.player2, removeCard)
     }
   }
+  t := winRound(cardsPlayed)
 
-  return team1.player2
+  if team1.player1.pId == gS.order[t].pId {
+    team1.player1.hand.tricks++
+    fmt.Printf("\nteam1:\n%+v\n",team1)
+    fmt.Printf("\nteam2:\n%+v\n",team2)
+    return team1.player1
+  } else if team1.player2.pId == gS.order[t].pId {
+    team1.player2.hand.tricks++
+    fmt.Printf("\nteam1:\n%+v\n",team1)
+    fmt.Printf("\nteam2:\n%+v\n",team2)
+    return team1.player2
+  } else if team2.player1.pId == gS.order[t].pId {
+    team2.player1.hand.tricks++
+    fmt.Printf("\nteam1:\n%+v\n",team1)
+    fmt.Printf("\nteam2:\n%+v\n",team2)
+    return team2.player1
+  } else if team2.player2.pId == gS.order[t].pId {
+    team2.player2.hand.tricks++
+    fmt.Printf("\nteam1:\n%+v\n",team1)
+    fmt.Printf("\nteam2:\n%+v\n",team2)
+    return team2.player2
+  }
+
+  return team1.player1
 }
 
 func playHand(team1 *Team, team2 *Team, gS gameState, firstPlayer Player) {
+
+  var trump int = -1
+  trump = 0
 
   for i := 0; i < 5; i++ {
     firstPlayerFound := false
@@ -76,7 +125,7 @@ func playHand(team1 *Team, team2 *Team, gS gameState, firstPlayer Player) {
       }
     }
 
-    firstPlayer = playRound(team1, team2, gS)
+    firstPlayer = playRound(team1, team2, gS, trump)
   }
 
 }
