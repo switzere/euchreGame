@@ -4,6 +4,9 @@ import (
   "fmt"
 )
 
+//TODO fix order, I think teams are grouped currently
+//TODO create calculating winners for hand
+
 type Team struct {
   player1 Player
   player2 Player
@@ -19,7 +22,7 @@ type roundState struct {
   start Player
 }
 
-func winRound(cards [4]Card) int {
+func winRound(cards []Card, trump int) int {
 //temporary calculator
   if cards[0].value > cards[1].value && cards[0].value > cards[2].value && cards[0].value > cards[3].value {
     return 0
@@ -34,12 +37,152 @@ func winRound(cards [4]Card) int {
   return -1
 }
 
+func testWinRound(cards []Card, trump int) int {
+
+  var numTrump int = 0
+  var largestTrump int = -1
+  var largestOfLed int = -1
+  var memCards [4]Card
+
+  led := cards[0].suit
+
+  if cards[0].suit == Spade {
+    fmt.Printf("Spade from const\n")
+  }
+  if cards[0].suit == 0 {
+    fmt.Printf("Spade from num\n")
+  }
+
+  //adjusting for jacks
+  for i := 0; i < 4; i++ {
+
+    if trump == Heart {
+      if cards[i].suit == Diamond && cards[i].value == 11 {
+        cards[i].value = 15
+        cards[i].suit = Heart
+      } else if cards[i].suit == Heart && cards[i].value == 11 {
+        cards[i].value = 16
+      }
+    } else if trump == Diamond {
+      if cards[i].suit == Heart && cards[i].value == 11 {
+        cards[i].value = 15
+        cards[i].suit = Diamond
+      } else if cards[i].suit == Diamond && cards[i].value == 11 {
+        cards[i].value = 16
+      }
+    } else if trump == Spade {
+      if cards[i].suit == Club && cards[i].value == 11 {
+        cards[i].value = 15
+        cards[i].suit = Spade
+      } else if cards[i].suit == Spade && cards[i].value == 11 {
+        cards[i].value = 16
+      }
+    } else if trump == Club {
+      if cards[i].suit == Spade && cards[i].value == 11 {
+        cards[i].value = 15
+        cards[i].suit = Club
+      } else if cards[i].suit == Club && cards[i].value == 11 {
+        cards[i].value = 16
+      }
+    }
+
+    if cards[i].suit == trump {
+      numTrump++
+    }
+    memCards[i] = cards[i]
+  }
+
+  fmt.Printf("adjusted cards: %+v\n",memCards)
+
+
+  //until 1 cards is determined the largest
+  for len(cards) > 1 {
+
+    //remove all cards that don't matter
+    for i := 0; i < len(cards); i++ {
+
+      if cards[i].suit != trump && numTrump > 0 {
+        fmt.Printf("%+v not trump when trump was played\n",cards[i])
+        cards = append(cards[:i], cards[i+1:]...)
+        i = 0
+      } else if cards[i].suit != led && numTrump == 0 {
+        fmt.Printf("%+v not following suit when no trump was played\n",cards[i])
+        cards = append(cards[:i], cards[i+1:]...)
+        i = 0
+      }
+
+    }
+
+    //find which of remaining trump is largest
+    if numTrump == len(cards) {
+
+      fmt.Printf("\n%+v\n\n",cards)
+
+      for i := 0; i < len(cards); i++ {
+        fmt.Printf("%d > %d\n",cards[i].value, largestTrump)
+        if cards[i].value > largestTrump {
+          fmt.Printf("%+v currently largest trump\n",cards[i])
+          largestTrump = cards[i].value
+        } else if cards[i].value < largestTrump {
+          fmt.Printf("%+v trump but smaller\n",cards[i])
+          cards = append(cards[:i], cards[i+1:]...)
+          i = -1
+        }
+        fmt.Printf("\n%+v\n\n",cards)
+      }
+
+      //else do largest of led suit
+    } else {
+      for i := 0; i < len(cards); i++ {
+        if cards[i].value > largestOfLed {
+          fmt.Printf("%+v currently largest led\n",cards[i])
+          largestOfLed = cards[i].value
+        } else if cards[i].value < largestOfLed {
+          fmt.Printf("%+v led but smaller\n",cards[i])
+          cards = append(cards[:i], cards[i+1:]...)
+          i = -1
+        }
+        fmt.Printf("\n%+v\n\n",cards)
+      }
+    }
+
+  }
+
+  fmt.Printf("memCards: %+v\n",memCards)
+  for i := 0; i < 4; i++ {
+    if memCards[i] == cards[0] {
+      return i
+    }
+  }
+
+  fmt.Printf("\n%+v\n\n",cards)
+  return -1
+}
+
+func test() {
+  var suit int = -1
+  var card int = -1
+  var cardsPlayed []Card
+
+  for i := 0; i < 4; i++ {
+    fmt.Printf("Card (suit,card):\n")
+    fmt.Scanf("%d,%d", &suit, &card)
+    //cardsPlayed[i] = Card{suit, card}
+    cardsPlayed = append(cardsPlayed, Card{suit, card})
+  }
+
+  fmt.Printf("Result: %d\n\n",testWinRound(cardsPlayed, 0))
+
+
+
+}
+
 func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
 
   var suit int = -1
   var card int = -1
 
-  var cardsPlayed [4]Card
+  var cardsPlayed []Card
 
   for i := 0; i < 4; i++ {
     if team1.player1.pId == gS.order[i].pId {
@@ -50,7 +193,8 @@ func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
       fmt.Println(suit)
       fmt.Println(card)
       removeCard := Card{suit, card}
-      cardsPlayed[i] = playCard(&team1.player1, removeCard)
+      //cardsPlayed[i] = playCard(&team1.player1, removeCard)
+      cardsPlayed = append(cardsPlayed, playCard(&team1.player1, removeCard))
     } else if team1.player2.pId == gS.order[i].pId {
       fmt.Printf("\nTeam 1 Player 2:\n")
       fmt.Printf("Hand: %+v\n\n",team1.player2.hand)
@@ -59,7 +203,8 @@ func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
       fmt.Println(suit)
       fmt.Println(card)
       removeCard := Card{suit, card}
-      cardsPlayed[i] = playCard(&team1.player2, removeCard)
+      //cardsPlayed[i] = playCard(&team1.player2, removeCard)
+      cardsPlayed = append(cardsPlayed, playCard(&team1.player2, removeCard))
     } else if team2.player1.pId == gS.order[i].pId {
       fmt.Printf("\nTeam 2 Player 1:\n")
       fmt.Printf("Hand: %+v\n\n",team2.player1.hand)
@@ -68,7 +213,8 @@ func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
       fmt.Println(suit)
       fmt.Println(card)
       removeCard := Card{suit, card}
-      cardsPlayed[i] = playCard(&team2.player1, removeCard)
+      //cardsPlayed[i] = playCard(&team2.player1, removeCard)
+      cardsPlayed = append(cardsPlayed, playCard(&team2.player1, removeCard))
     } else if team2.player2.pId == gS.order[i].pId {
       fmt.Printf("\nTeam 2 Player 2:\n")
       fmt.Printf("Hand: %+v\n\n",team2.player2.hand)
@@ -77,10 +223,11 @@ func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
       fmt.Println(suit)
       fmt.Println(card)
       removeCard := Card{suit, card}
-      cardsPlayed[i] = playCard(&team2.player2, removeCard)
+      //cardsPlayed[i] = playCard(&team2.player2, removeCard)
+      cardsPlayed = append(cardsPlayed, playCard(&team2.player2, removeCard))
     }
   }
-  t := winRound(cardsPlayed)
+  t := winRound(cardsPlayed, trump)
 
   if team1.player1.pId == gS.order[t].pId {
     team1.player1.hand.tricks++
@@ -185,6 +332,8 @@ func main() {
       fmt.Println("Exiting...\n")
     } else if input == "play" {
       play()
+    } else if input == "test" {
+      test()
     } else {
       fmt.Println("Invalid command\n")
     }

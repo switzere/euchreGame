@@ -27,8 +27,8 @@ type playedCard struct {
 const (
   Spade = iota
   Heart
-  Diamond
   Club
+  Diamond
 )
 
 func makeDeck(deckType string) *Deck {
