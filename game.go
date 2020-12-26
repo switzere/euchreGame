@@ -5,7 +5,12 @@ import (
 )
 
 //TODO fix order, I think teams are grouped currently
-//TODO create calculating winners for hand
+//TODO force following suit
+//TODO go around letting people pass or play
+//TODO choose trump after turned down
+//TODO change start order after hands
+
+//TODO Re-factor everything its a huge mess
 
 type Team struct {
   player1 Player
@@ -22,22 +27,8 @@ type roundState struct {
   start Player
 }
 
+
 func winRound(cards []Card, trump int) int {
-//temporary calculator
-  if cards[0].value > cards[1].value && cards[0].value > cards[2].value && cards[0].value > cards[3].value {
-    return 0
-  } else if cards[1].value > cards[0].value && cards[1].value > cards[2].value && cards[1].value > cards[3].value {
-    return 1
-  } else if cards[2].value > cards[0].value && cards[2].value > cards[1].value && cards[2].value > cards[3].value {
-    return 2
-  } else if cards[3].value > cards[0].value && cards[3].value > cards[1].value && cards[3].value > cards[2].value {
-    return 3
-  }
-
-  return -1
-}
-
-func testWinRound(cards []Card, trump int) int {
 
   var numTrump int = 0
   var largestTrump int = -1
@@ -171,7 +162,7 @@ func test() {
     cardsPlayed = append(cardsPlayed, Card{suit, card})
   }
 
-  fmt.Printf("Result: %d\n\n",testWinRound(cardsPlayed, 0))
+  fmt.Printf("Result: %d\n\n",winRound(cardsPlayed, 0))
 
 
 
@@ -254,14 +245,52 @@ func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
   return team1.player1
 }
 
-func playHand(team1 *Team, team2 *Team, gS gameState, firstPlayer Player) {
+func playHand(team1 *Team, team2 *Team, deck *Deck, gS gameState, firstPlayer Player) {
 
   var trump int = -1
   trump = 0
 
+  var suit int = -1
+  var card int = -1
+
+  turnUp := drawCard(deck)
+  fmt.Printf("Turned up card is: %+v\n\n",turnUp)
+
+  if team1.player1.pId == firstPlayer.pId {
+    fmt.Printf("Replace card from(t1p1): %+v\n",team1.player1.hand)
+    fmt.Scanf("%d,%d", &suit, &card)
+    removeCard := Card{suit, card}
+    playCard(&team1.player1, removeCard)
+    getCard(&team1.player1, turnUp)
+    trump = turnUp.suit
+  } else if team1.player2.pId == firstPlayer.pId {
+    fmt.Printf("Replace card from(t1p2): %+v\n",team1.player2.hand)
+    fmt.Scanf("%d,%d", &suit, &card)
+    removeCard := Card{suit, card}
+    playCard(&team1.player2, removeCard)
+    getCard(&team1.player2, turnUp)
+    trump = turnUp.suit
+  } else if team2.player1.pId == firstPlayer.pId {
+    fmt.Printf("Replace card from(t2p1): %+v\n",team2.player1.hand)
+    fmt.Scanf("%d,%d", &suit, &card)
+    removeCard := Card{suit, card}
+    playCard(&team2.player1, removeCard)
+    getCard(&team2.player1, turnUp)
+    trump = turnUp.suit
+  } else if team2.player2.pId == firstPlayer.pId {
+    fmt.Printf("Replace card from(t2p2): %+v\n",team2.player2.hand)
+    fmt.Scanf("%d,%d", &suit, &card)
+    removeCard := Card{suit, card}
+    playCard(&team2.player2, removeCard)
+    getCard(&team2.player2, turnUp)
+    trump = turnUp.suit
+  }
+
+
   for i := 0; i < 5; i++ {
     firstPlayerFound := false
 
+    //rotate through list to find first player
     for firstPlayerFound == false {
       if gS.order[0].pId == firstPlayer.pId {
         firstPlayerFound = true
@@ -271,6 +300,7 @@ func playHand(team1 *Team, team2 *Team, gS gameState, firstPlayer Player) {
         gS.order = append(gS.order, x)
       }
     }
+
 
     firstPlayer = playRound(team1, team2, gS, trump)
   }
@@ -292,7 +322,7 @@ func play() {
   team1 := Team{player1: *playerA, player2: *playerB, points: 0}
   team2 := Team{player1: *playerC, player2: *playerD, points: 0}
 
-  gState := gameState{order: []Player{team1.player1, team1.player2, team2.player1, team2.player2}}
+  gState := gameState{order: []Player{team1.player1, team2.player1, team1.player2, team2.player2}}
 
   deck := *makeDeck("euchre")
 
@@ -311,7 +341,7 @@ func play() {
 
   fmt.Printf("deck:\n%+v\n\n",deck)
 
-  playHand(&team1, &team2, gState, team1.player1)
+  playHand(&team1, &team2, &deck, gState, team1.player1)
 
 }
 

@@ -29,3 +29,7 @@ func playCard(player *Player, card Card) Card {
   return card
 
 }
+
+func getCard(player *Player, card Card) {
+  player.hand.cards = append(player.hand.cards, card)
+}
