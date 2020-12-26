@@ -4,6 +4,8 @@ import (
   //"fmt"
   "math/rand"
   "time"
+  "strings"
+  "strconv"
 )
 
 
@@ -82,4 +84,65 @@ func drawHand(deck *Deck, hand *Hand, numCards int) {
   for i := 0; i < numCards; i++ {
     hand.cards = append(hand.cards, drawCard(deck))
   }
+}
+
+func suitToNum(suit string) int {
+
+  if strings.ToLower(suit) == "spade" || strings.ToLower(suit) == "spades" {
+    return 0
+  } else if strings.ToLower(suit) == "heart" || strings.ToLower(suit) == "hearts" {
+    return 1
+  } else if strings.ToLower(suit) == "club" || strings.ToLower(suit) == "clubs" {
+    return 2
+  } else if strings.ToLower(suit) == "diamond" || strings.ToLower(suit) == "diamonds" {
+    return 3
+  }
+
+  return -1
+}
+
+func numToSuit(suit int) string {
+
+  if suit == 0 {
+    return "Spade"
+  } else if suit == 1 {
+    return "Heart"
+  } else if suit == 2 {
+    return "Club"
+  } else if suit == 3 {
+    return "Diamond"
+  }
+
+  return "error"
+}
+
+func faceToNum(value string) int {
+
+  if strings.ToLower(value) == "jack" {
+    return 11
+  } else if strings.ToLower(value) == "queen" {
+    return 12
+  } else if strings.ToLower(value) == "king" {
+    return 13
+  } else if strings.ToLower(value) == "ace" {
+    return 14
+  }
+
+  ret, _ := strconv.Atoi(value)
+  return ret
+}
+
+func numToFace(value int) string {
+
+  if value == 11 {
+    return "Jack"
+  } else if value == 12 {
+    return "Queen"
+  } else if value == 13 {
+    return "King"
+  } else if value == 14 {
+    return "Ace"
+  }
+
+  return  strconv.Itoa(value)
 }

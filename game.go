@@ -9,6 +9,7 @@ import (
 //TODO go around letting people pass or play
 //TODO choose trump after turned down
 //TODO change start order after hands
+//TODO validate input
 
 //TODO Re-factor everything its a huge mess
 
@@ -173,48 +174,50 @@ func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
   var suit int = -1
   var card int = -1
 
+  var inSuit string = ""
+  var inCard string = ""
+
   var cardsPlayed []Card
 
   for i := 0; i < 4; i++ {
     if team1.player1.pId == gS.order[i].pId {
       fmt.Printf("\nTeam 1 Player 1:\n")
-      fmt.Printf("Hand: %+v\n\n",team1.player1.hand)
+      printHand(team1.player1.hand)
       fmt.Printf("Choose a card to play: ")
-      fmt.Scanf("%d,%d", &suit, &card)
-      fmt.Println(suit)
-      fmt.Println(card)
+      fmt.Scanf("%s of %s\n",&inCard,&inSuit)
+      suit = suitToNum(inSuit)
+      card = faceToNum(inCard)
       removeCard := Card{suit, card}
-      //cardsPlayed[i] = playCard(&team1.player1, removeCard)
       cardsPlayed = append(cardsPlayed, playCard(&team1.player1, removeCard))
+
     } else if team1.player2.pId == gS.order[i].pId {
       fmt.Printf("\nTeam 1 Player 2:\n")
-      fmt.Printf("Hand: %+v\n\n",team1.player2.hand)
+      printHand(team1.player2.hand)
       fmt.Printf("Choose a card to play: ")
-      fmt.Scanf("%d,%d", &suit, &card)
-      fmt.Println(suit)
-      fmt.Println(card)
+      fmt.Scanf("%s of %s\n",&inCard,&inSuit)
+      suit = suitToNum(inSuit)
+      card = faceToNum(inCard)
       removeCard := Card{suit, card}
-      //cardsPlayed[i] = playCard(&team1.player2, removeCard)
       cardsPlayed = append(cardsPlayed, playCard(&team1.player2, removeCard))
+
     } else if team2.player1.pId == gS.order[i].pId {
       fmt.Printf("\nTeam 2 Player 1:\n")
-      fmt.Printf("Hand: %+v\n\n",team2.player1.hand)
+      printHand(team2.player1.hand)
       fmt.Printf("Choose a card to play: ")
-      fmt.Scanf("%d,%d", &suit, &card)
-      fmt.Println(suit)
-      fmt.Println(card)
+      fmt.Scanf("%s of %s\n",&inCard,&inSuit)
+      suit = suitToNum(inSuit)
+      card = faceToNum(inCard)
       removeCard := Card{suit, card}
-      //cardsPlayed[i] = playCard(&team2.player1, removeCard)
       cardsPlayed = append(cardsPlayed, playCard(&team2.player1, removeCard))
+
     } else if team2.player2.pId == gS.order[i].pId {
       fmt.Printf("\nTeam 2 Player 2:\n")
-      fmt.Printf("Hand: %+v\n\n",team2.player2.hand)
+      printHand(team2.player2.hand)
       fmt.Printf("Choose a card to play: ")
-      fmt.Scanf("%d,%d", &suit, &card)
-      fmt.Println(suit)
-      fmt.Println(card)
+      fmt.Scanf("%s of %s\n",&inCard,&inSuit)
+      suit = suitToNum(inSuit)
+      card = faceToNum(inCard)
       removeCard := Card{suit, card}
-      //cardsPlayed[i] = playCard(&team2.player2, removeCard)
       cardsPlayed = append(cardsPlayed, playCard(&team2.player2, removeCard))
     }
   }
@@ -222,23 +225,31 @@ func playRound(team1 *Team, team2 *Team, gS gameState, trump int) Player {
 
   if team1.player1.pId == gS.order[t].pId {
     team1.player1.hand.tricks++
-    fmt.Printf("\nteam1:\n%+v\n",team1)
-    fmt.Printf("\nteam2:\n%+v\n",team2)
+    fmt.Printf("\nTeam 1:\n")
+    printTeam(*team1)
+    fmt.Printf("\nTeam 2:\n")
+    printTeam(*team2)
     return team1.player1
   } else if team1.player2.pId == gS.order[t].pId {
     team1.player2.hand.tricks++
-    fmt.Printf("\nteam1:\n%+v\n",team1)
-    fmt.Printf("\nteam2:\n%+v\n",team2)
+    fmt.Printf("\nTeam 1:\n")
+    printTeam(*team1)
+    fmt.Printf("\nTeam 2:\n")
+    printTeam(*team2)
     return team1.player2
   } else if team2.player1.pId == gS.order[t].pId {
     team2.player1.hand.tricks++
-    fmt.Printf("\nteam1:\n%+v\n",team1)
-    fmt.Printf("\nteam2:\n%+v\n",team2)
+    fmt.Printf("\nTeam 1:\n")
+    printTeam(*team1)
+    fmt.Printf("\nTeam 2:\n")
+    printTeam(*team2)
     return team2.player1
   } else if team2.player2.pId == gS.order[t].pId {
     team2.player2.hand.tricks++
-    fmt.Printf("\nteam1:\n%+v\n",team1)
-    fmt.Printf("\nteam2:\n%+v\n",team2)
+    fmt.Printf("\nTeam 1:\n")
+    printTeam(*team1)
+    fmt.Printf("\nTeam 2:\n")
+    printTeam(*team2)
     return team2.player2
   }
 
@@ -253,33 +264,55 @@ func playHand(team1 *Team, team2 *Team, deck *Deck, gS gameState, firstPlayer Pl
   var suit int = -1
   var card int = -1
 
+  var inSuit string = ""
+  var inCard string = ""
+
   turnUp := drawCard(deck)
-  fmt.Printf("Turned up card is: %+v\n\n",turnUp)
+  //fmt.Printf("Turned up card is: %+v\n\n",turnUp)
+  fmt.Printf("Turned up card is: ")
+  printCard(turnUp)
+  fmt.Printf("\n\n")
+
 
   if team1.player1.pId == firstPlayer.pId {
-    fmt.Printf("Replace card from(t1p1): %+v\n",team1.player1.hand)
-    fmt.Scanf("%d,%d", &suit, &card)
+    fmt.Printf("Replace card from(t1p1): ")
+    printHand(team1.player1.hand)
+    fmt.Scanf("%s of %s\n",&inCard,&inSuit)
+    suit = suitToNum(inSuit)
+    card = faceToNum(inCard)
     removeCard := Card{suit, card}
     playCard(&team1.player1, removeCard)
     getCard(&team1.player1, turnUp)
     trump = turnUp.suit
+
   } else if team1.player2.pId == firstPlayer.pId {
-    fmt.Printf("Replace card from(t1p2): %+v\n",team1.player2.hand)
-    fmt.Scanf("%d,%d", &suit, &card)
+    fmt.Printf("Replace card from(t1p2): ")
+    printHand(team1.player2.hand)
+    fmt.Scanf("%s of %s\n",&inCard,&inSuit)
+    suit = suitToNum(inSuit)
+    card = faceToNum(inCard)
     removeCard := Card{suit, card}
     playCard(&team1.player2, removeCard)
     getCard(&team1.player2, turnUp)
     trump = turnUp.suit
+
   } else if team2.player1.pId == firstPlayer.pId {
-    fmt.Printf("Replace card from(t2p1): %+v\n",team2.player1.hand)
-    fmt.Scanf("%d,%d", &suit, &card)
+    fmt.Printf("Replace card from(t2p1): ")
+    printHand(team2.player1.hand)
+    fmt.Scanf("%s of %s\n",&inCard,&inSuit)
+    suit = suitToNum(inSuit)
+    card = faceToNum(inCard)
     removeCard := Card{suit, card}
     playCard(&team2.player1, removeCard)
     getCard(&team2.player1, turnUp)
     trump = turnUp.suit
+
   } else if team2.player2.pId == firstPlayer.pId {
-    fmt.Printf("Replace card from(t2p2): %+v\n",team2.player2.hand)
-    fmt.Scanf("%d,%d", &suit, &card)
+    fmt.Printf("Replace card from(t2p2): ")
+    printHand(team2.player2.hand)
+    fmt.Scanf("%s of %s\n",&inCard,&inSuit)
+    suit = suitToNum(inSuit)
+    card = faceToNum(inCard)
     removeCard := Card{suit, card}
     playCard(&team2.player2, removeCard)
     getCard(&team2.player2, turnUp)
@@ -326,7 +359,8 @@ func play() {
 
   deck := *makeDeck("euchre")
 
-  fmt.Printf("%+v\n",deck)
+  //fmt.Printf("%+v\n",deck)
+  printDeck(deck)
 
   drawHand(&deck, &team1.player1.hand, 5)
   drawHand(&deck, &team1.player2.hand, 5)
@@ -334,12 +368,15 @@ func play() {
   drawHand(&deck, &team2.player2.hand, 5)
 
 
-  fmt.Printf("\nplayer1 from team1:\n%+v\n",team1.player1)
-  fmt.Printf("player2 from team1:\n%+v\n\n",team1.player2)
-  fmt.Printf("player1 from team2:\n%+v\n\n",team2.player1)
-  fmt.Printf("player2 from team2:\n%+v\n\n",team2.player2)
+  //fmt.Printf("\nplayer1 from team1:\n%+v\n",team1.player1)
+  //fmt.Printf("player2 from team1:\n%+v\n\n",team1.player2)
+  //fmt.Printf("player1 from team2:\n%+v\n\n",team2.player1)
+  //fmt.Printf("player2 from team2:\n%+v\n\n",team2.player2)
+  printTeam(team1)
+  printTeam(team2)
 
-  fmt.Printf("deck:\n%+v\n\n",deck)
+  //fmt.Printf("deck:\n%+v\n\n",deck)
+  printDeck(deck)
 
   playHand(&team1, &team2, &deck, gState, team1.player1)
 
