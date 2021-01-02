@@ -4,6 +4,12 @@ import (
   "fmt"
 )
 
+type Team struct {
+  player1 Player
+  player2 Player
+  points int
+}
+
 type Hand struct {
   cards []Card
   tricks int

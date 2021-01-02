@@ -146,3 +146,39 @@ func numToFace(value int) string {
 
   return  strconv.Itoa(value)
 }
+
+func adjustCard(card Card, trump int) Card {
+
+  if trump == Heart {
+    if card.suit == Diamond && card.value == 11 {
+      card.value = 15
+      card.suit = Heart
+    } else if card.suit == Heart && card.value == 11 {
+      card.value = 16
+    }
+  } else if trump == Diamond {
+    if card.suit == Heart && card.value == 11 {
+      card.value = 15
+      card.suit = Diamond
+    } else if card.suit == Diamond && card.value == 11 {
+      card.value = 16
+    }
+  } else if trump == Spade {
+    if card.suit == Club && card.value == 11 {
+      card.value = 15
+      card.suit = Spade
+    } else if card.suit == Spade && card.value == 11 {
+      card.value = 16
+    }
+  } else if trump == Club {
+    if card.suit == Spade && card.value == 11 {
+      card.value = 15
+      card.suit = Club
+    } else if card.suit == Club && card.value == 11 {
+      card.value = 16
+    }
+  }
+
+  return card
+
+}

@@ -4,20 +4,14 @@ import (
   "fmt"
 )
 
-//TODO fix order, I think teams are grouped currently
-//TODO force following suit
 //TODO go around letting people pass or play
 //TODO choose trump after turned down
 //TODO change start order after hands
-//TODO validate input
 
 //TODO Re-factor everything its a huge mess
 
-type Team struct {
-  player1 Player
-  player2 Player
-  points int
-}
+//TODO create reactjs frontend - will need to remember how to do this
+
 
 //Using a slice instead of list here. List is probably better but for familiarity slice should work
 type gameState struct {
@@ -28,42 +22,6 @@ type roundState struct {
   start Player
 }
 
-
-func adjustCard(card Card, trump int) Card {
-
-  if trump == Heart {
-    if card.suit == Diamond && card.value == 11 {
-      card.value = 15
-      card.suit = Heart
-    } else if card.suit == Heart && card.value == 11 {
-      card.value = 16
-    }
-  } else if trump == Diamond {
-    if card.suit == Heart && card.value == 11 {
-      card.value = 15
-      card.suit = Diamond
-    } else if card.suit == Diamond && card.value == 11 {
-      card.value = 16
-    }
-  } else if trump == Spade {
-    if card.suit == Club && card.value == 11 {
-      card.value = 15
-      card.suit = Spade
-    } else if card.suit == Spade && card.value == 11 {
-      card.value = 16
-    }
-  } else if trump == Club {
-    if card.suit == Spade && card.value == 11 {
-      card.value = 15
-      card.suit = Club
-    } else if card.suit == Club && card.value == 11 {
-      card.value = 16
-    }
-  }
-
-  return card
-
-}
 
 func winRound(cards []Card, trump int) int {
 
