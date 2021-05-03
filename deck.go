@@ -10,20 +10,20 @@ import (
 
 
 type Deck struct {
-  cards []Card
-  drawnCards []Card
-  inDeckCards []Card
+  Cards []Card
+  DrawnCards []Card
+  InDeckCards []Card
 }
 
 type Card struct {
-  suit int
-  value int
+  Suit int
+  Value int
 }
 
 type playedCard struct {
-  suit int
-  value int
-  owner Player
+  Suit int
+  Value int
+  Owner Player
 }
 
 const (
@@ -42,8 +42,8 @@ func makeDeck(deckType string) *Deck {
       for j := 0; j < 6; j++ {
 
         newCard := Card{i, j + 9}
-        deck.cards = append(deck.cards, newCard)
-        deck.inDeckCards = append(deck.inDeckCards, newCard)
+        deck.Cards = append(deck.Cards, newCard)
+        deck.InDeckCards = append(deck.InDeckCards, newCard)
 
       }
     }
@@ -53,8 +53,8 @@ func makeDeck(deckType string) *Deck {
       for j := 0; j < 13; j++ {
 
         newCard := Card{i, j}
-        deck.cards = append(deck.cards, newCard)
-        deck.inDeckCards = append(deck.inDeckCards, newCard)
+        deck.Cards = append(deck.Cards, newCard)
+        deck.InDeckCards = append(deck.InDeckCards, newCard)
 
       }
     }
@@ -65,15 +65,28 @@ func makeDeck(deckType string) *Deck {
 }
 
 func drawCard(deck *Deck) Card {
-  if(len(deck.inDeckCards) == 0) {
+  if(len(deck.InDeckCards) == 0) {
     return Card{-1, -1}
   }
   seed := rand.NewSource(time.Now().UnixNano())
   random := rand.New(seed)
-  r := random.Intn(len(deck.inDeckCards))
-  retCard := deck.inDeckCards[r]
-  deck.inDeckCards = append(deck.inDeckCards[:r], deck.inDeckCards[r+1:]...)
+  r := random.Intn(len(deck.InDeckCards))
+  retCard := deck.InDeckCards[r]
+  deck.InDeckCards = append(deck.InDeckCards[:r], deck.InDeckCards[r+1:]...)
   return retCard
+}
+
+func drawSpecificCard(deck *Deck, card Card) Card {
+
+  for i := 0; i < len(deck.InDeckCards); i++ {
+    if deck.InDeckCards[i].Suit == card.Suit && deck.InDeckCards[i].Value == card.Value {
+      deck.InDeckCards = append(deck.InDeckCards[:i], deck.InDeckCards[i+1:]...)
+      return card
+    }
+  }
+
+  return Card{-1, -1}
+
 }
 
 func drawHand(deck *Deck, hand *Hand, numCards int) {
@@ -82,7 +95,7 @@ func drawHand(deck *Deck, hand *Hand, numCards int) {
   }
 
   for i := 0; i < numCards; i++ {
-    hand.cards = append(hand.cards, drawCard(deck))
+    hand.Cards = append(hand.Cards, drawCard(deck))
   }
 }
 
@@ -150,32 +163,32 @@ func numToFace(value int) string {
 func adjustCard(card Card, trump int) Card {
 
   if trump == Heart {
-    if card.suit == Diamond && card.value == 11 {
-      card.value = 15
-      card.suit = Heart
-    } else if card.suit == Heart && card.value == 11 {
-      card.value = 16
+    if card.Suit == Diamond && card.Value == 11 {
+      card.Value = 15
+      card.Suit = Heart
+    } else if card.Suit == Heart && card.Value == 11 {
+      card.Value = 16
     }
   } else if trump == Diamond {
-    if card.suit == Heart && card.value == 11 {
-      card.value = 15
-      card.suit = Diamond
-    } else if card.suit == Diamond && card.value == 11 {
-      card.value = 16
+    if card.Suit == Heart && card.Value == 11 {
+      card.Value = 15
+      card.Suit = Diamond
+    } else if card.Suit == Diamond && card.Value == 11 {
+      card.Value = 16
     }
   } else if trump == Spade {
-    if card.suit == Club && card.value == 11 {
-      card.value = 15
-      card.suit = Spade
-    } else if card.suit == Spade && card.value == 11 {
-      card.value = 16
+    if card.Suit == Club && card.Value == 11 {
+      card.Value = 15
+      card.Suit = Spade
+    } else if card.Suit == Spade && card.Value == 11 {
+      card.Value = 16
     }
   } else if trump == Club {
-    if card.suit == Spade && card.value == 11 {
-      card.value = 15
-      card.suit = Club
-    } else if card.suit == Club && card.value == 11 {
-      card.value = 16
+    if card.Suit == Spade && card.Value == 11 {
+      card.Value = 15
+      card.Suit = Club
+    } else if card.Suit == Club && card.Value == 11 {
+      card.Value = 16
     }
   }
 
