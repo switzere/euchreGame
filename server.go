@@ -9,6 +9,7 @@ import (
 )
 
 var deck Deck
+var hand Hand
 
 type Card1 struct {
   suit int
@@ -69,6 +70,15 @@ func resetDeck(w http.ResponseWriter, r *http.Request) {
   deck = *makeDeck("euchre")
 }
 
+func drawPlayerHand(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Access-Control-Allow-Origin", "*")
+
+  drawHand(&deck, &hand, 5)
+  printHand(hand)
+
+  fmt.Fprintf(w, "Hand: %+v", hand)
+}
+
 func main() {
 
   router := mux.NewRouter()
@@ -79,6 +89,7 @@ func main() {
   router.HandleFunc("/", home)
   router.HandleFunc("/cards", cards)
   router.HandleFunc("/resetDeck", resetDeck)
+  router.HandleFunc("/drawPlayerHand", drawPlayerHand)
   router.HandleFunc("/play", play).Methods("POST", "OPTIONS")
   http.ListenAndServe(":3001", router)
 
