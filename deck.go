@@ -94,9 +94,15 @@ func drawHand(deck *Deck, hand *Hand, numCards int) {
     return
   }
 
+  hand.Cards = nil
+
   for i := 0; i < numCards; i++ {
     hand.Cards = append(hand.Cards, drawCard(deck))
   }
+}
+
+func drawHandUnique(deck *Deck, player *Player, numCards int) {
+  drawHand(deck, &player.Hand, numCards)
 }
 
 func suitToNum(suit string) int {
