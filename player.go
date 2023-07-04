@@ -1,108 +1,128 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 )
 
 type Team struct {
-  Player1 Player
-  Player2 Player
-  Points int
+	Player1 Player
+	Player2 Player
+	Points  int
 }
 
 type Hand struct {
-  Cards []Card
-  Tricks int
+	Cards []Card
 }
 
 type Player struct {
-  Hand Hand
-  PId int
+	Hand   Hand
+	PId    int
+	Tricks int
 }
 
 func getInputCard(hand Hand, played []Card, trump int) Card {
-  success := false
+	success := false
 
-  var suit int = -1
-  var card int = -1
+	var suit int = -1
+	var card int = -1
 
-  var inSuit string = ""
-  var inCard string = ""
+	var inSuit string = ""
+	var inCard string = ""
 
-  if len(hand.Cards) < 1 {
-    return Card{-1,-1}
-  }
+	if len(hand.Cards) < 1 {
+		return Card{-1, -1}
+	}
 
-  for success == false {
-    fmt.Scanf("%s of %s\n",&inCard,&inSuit)
-    suit = suitToNum(inSuit)
-    card = faceToNum(inCard)
-    inputCard := Card{suit, card}
-    exists := false
-    hasSuitLed := false
+	for success == false {
+		fmt.Scanf("%s of %s\n", &inCard, &inSuit)
+		suit = suitToNum(inSuit)
+		card = faceToNum(inCard)
+		inputCard := Card{suit, card}
+		exists := false
+		hasSuitLed := false
 
-    if len(played) > 0 {
-      for i := 0; i < len(hand.Cards); i++ {
-        //check if exists in hand
-        if hand.Cards[i].Suit == suit && hand.Cards[i].Value == card {
-          exists = true
-        }
-        //check for suit led
-        if adjustCard(hand.Cards[i], trump).Suit == adjustCard(played[0], trump).Suit {
-          hasSuitLed = true
-        }
-      }
+		if len(played) > 0 {
+			for i := 0; i < len(hand.Cards); i++ {
+				//check if exists in hand
+				if hand.Cards[i].Suit == suit && hand.Cards[i].Value == card {
+					exists = true
+				}
+				//check for suit led
+				if adjustCard(hand.Cards[i], trump).Suit == adjustCard(played[0], trump).Suit {
+					hasSuitLed = true
+				}
+			}
 
+			fmt.Printf("Card chosen: %+v, Card led: %+v\n", adjustCard(inputCard, trump), adjustCard(played[0], trump))
+			if exists == true && hasSuitLed == true && adjustCard(inputCard, trump).Suit == adjustCard(played[0], trump).Suit {
+				return inputCard
+			} else if exists == true && hasSuitLed == false {
+				return inputCard
+			} else if exists == false {
+				fmt.Printf("Card not in hand, example: ")
+				printCard(hand.Cards[0])
+				fmt.Printf("\n")
+			} else if hasSuitLed == true {
+				fmt.Printf("Must follow lead suit of: ")
+				printCard(played[0])
+				fmt.Printf("\n")
+			}
 
-      fmt.Printf("Card chosen: %+v, Card led: %+v\n",adjustCard(inputCard, trump),adjustCard(played[0], trump))
-      if exists == true && hasSuitLed == true && adjustCard(inputCard, trump).Suit == adjustCard(played[0], trump).Suit {
-        return inputCard
-      } else if exists == true && hasSuitLed == false {
-        return inputCard
-      } else if exists == false {
-        fmt.Printf("Card not in hand, example: ")
-        printCard(hand.Cards[0])
-        fmt.Printf("\n")
-      } else if hasSuitLed == true {
-        fmt.Printf("Must follow lead suit of: ",)
-        printCard(played[0])
-        fmt.Printf("\n")
-      }
+		} else if len(played) == 0 {
+			for i := 0; i < len(hand.Cards); i++ {
+				//check if exists in hand
+				if hand.Cards[i].Suit == suit && hand.Cards[i].Value == card {
+					return inputCard
+				}
+			}
+			fmt.Printf("Card not in hand, example: ")
+			printCard(hand.Cards[0])
+			fmt.Printf("\n")
+		}
 
-    } else if len(played) == 0 {
-      for i := 0; i < len(hand.Cards); i++ {
-        //check if exists in hand
-        if hand.Cards[i].Suit == suit && hand.Cards[i].Value == card {
-          return inputCard
-        }
-      }
-      fmt.Printf("Card not in hand, example: ")
-      printCard(hand.Cards[0])
-      fmt.Printf("\n")
-    }
+	}
 
-
-  }
-
-  return Card{suit, card}
+	return Card{suit, card}
 }
 
 func playCard(player *Player, card Card) Card {
 
-  for i := 0; i < len(player.Hand.Cards); i++ {
-    if player.Hand.Cards[i].Suit == card.Suit && player.Hand.Cards[i].Value == card.Value {
-      fmt.Printf("remove %+v\n",card)
-      player.Hand.Cards = append(player.Hand.Cards[:i], player.Hand.Cards[i+1:]...)
-      return card
-    } else {
-      fmt.Printf("dont remove %+v\n",player.Hand.Cards[i])
-    }
-  }
+	for i := 0; i < len(player.Hand.Cards); i++ {
+		if player.Hand.Cards[i].Suit == card.Suit && player.Hand.Cards[i].Value == card.Value {
+			fmt.Printf("remove %+v\n", card)
+			player.Hand.Cards = append(player.Hand.Cards[:i], player.Hand.Cards[i+1:]...)
+			return card
+		} else {
+			fmt.Printf("dont remove %+v\n", player.Hand.Cards[i])
+		}
+	}
 
-  return card
+	return card
 
 }
 
+func validateCardInHand(hand Hand, card Card) bool {
+	for i := 0; i < len(hand.Cards); i++ {
+		if hand.Cards[i].Suit == card.Suit && hand.Cards[i].Value == card.Value {
+			return true
+		}
+	}
+	return false
+}
+
+func validateFollowSuitRules(hand Hand, card Card, lead Card, trump int) bool {
+	if card.Suit == lead.Suit {
+		return true
+	} else {
+		for i := 0; i < len(hand.Cards); i++ {
+			if hand.Cards[i].Suit == lead.Suit {
+				return false
+			}
+		}
+		return true
+	}
+
+
 func getCard(player *Player, card Card) {
-  player.Hand.Cards = append(player.Hand.Cards, card)
+	player.Hand.Cards = append(player.Hand.Cards, card)
 }
