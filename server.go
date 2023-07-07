@@ -20,6 +20,7 @@ var trump int
 var playerOrder []Player
 var roundPlayerOrder []Player
 var playedCards []Card
+var dealer Player
 
 var playerA Player
 var playerB Player
@@ -240,6 +241,7 @@ func initRound(w http.ResponseWriter, r *http.Request) {
 	//will need to cycle round order after every round
 	roundPlayerOrder = []Player{playerA, playerB, playerC, playerD}
 	playerOrder = []Player{playerA, playerB, playerC, playerD}
+	dealer = roundPlayerOrder[0]
 
 	turnedUpCard = drawCard(&deck)
 
@@ -272,7 +274,8 @@ func getRoundInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(w, "Turned Up Card: %+v\n", turnedUpCard)
 	fmt.Fprintf(w, "Trump: %+v\n", trump)
-	fmt.Fprintf(w, "Player Turn: %+v", playerOrder[0].PId)
+	fmt.Fprintf(w, "Player Turn: %+v\n", playerOrder[0].PId)
+	fmt.Fprintf(w, "Dealer: %+v\n", dealer.PId)
 
 }
 
@@ -307,6 +310,29 @@ func chooseTrump(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func dealerPickUp(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+
+	var data Data
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if data.PId == dealer.PId {
+		allowed := swapWithCardInHand(returnPlayerOnPId([]*Player{&playerA, &playerB, &playerC, &playerD}, data.PId), data.Card, turnedUpCard)
+		if !allowed {
+			fmt.Fprint(w, "Error - Card not in hand\n", data.PId)
+		} else {
+			fmt.Fprintf(w, "Put Down: %+v\n", data.Card)
+		}
+	}
+}
+
 func playCardFromHand(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -333,7 +359,9 @@ func playCardFromHand(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	//go run server.go deck.go player.go print.go
 
+	fmt.Printf("Launching...")
 	router := mux.NewRouter()
 
 	// deck = *makeDeck("euchre")
@@ -368,6 +396,7 @@ func main() {
 	router.HandleFunc("/initRound", initRound)
 	router.HandleFunc("/getRoundInfo", getRoundInfo).Methods("POST", "OPTIONS")
 	router.HandleFunc("/chooseTrump", chooseTrump).Methods("POST", "OPTIONS")
+	router.HandleFunc("/dealerPickUp", dealerPickUp).Methods("POST", "OPTIONS")
 
 	http.ListenAndServe(":3001", router)
 

@@ -121,8 +121,33 @@ func validateFollowSuitRules(hand Hand, card Card, lead Card, trump int) bool {
 		}
 		return true
 	}
-
+}
 
 func getCard(player *Player, card Card) {
 	player.Hand.Cards = append(player.Hand.Cards, card)
+}
+
+func swapWithCardInHand(player *Player, card Card, swap Card) bool {
+	for i := 0; i < len(player.Hand.Cards); i++ {
+		if player.Hand.Cards[i].Suit == card.Suit && player.Hand.Cards[i].Value == card.Value {
+			player.Hand.Cards[i] = swap
+			return true
+		}
+	}
+	return false
+}
+
+func returnPlayerOnPId(players []*Player, pid int) *Player {
+	for i := 0; i < len(players); i++ {
+		if players[i].PId == pid {
+			return players[i]
+		}
+	}
+	return nil
+}
+
+func exampleUseofReturnPlayerOnPId() {
+	players := []*Player{&Player{PId: 1}, &Player{PId: 2}, &Player{PId: 3}, &Player{PId: 4}}
+	player := returnPlayerOnPId(players, 2)
+	fmt.Printf("Player: %+v\n", player)
 }
